@@ -1,0 +1,11 @@
+Sale_ID,Date,Customer_Name,Product,Quantity,Price,Total
+1,2025-06-01,Alice Smith,Laptop,1,900,900
+2,2025-06-01,Bob Johnson,Mouse,2,20,40
+3,2025-06-02,Carol White,Keyboard,1,50,50
+4,2025-06-02,David Brown,Monitor,2,150,300
+5,2025-06-03,Eva Green,USB-C Cable,3,10,30
+6,2025-06-03,Frank Black,Laptop,1,850,850
+7,2025-06-04,Grace Blue,Desk Chair,1,120,120
+8,2025-06-04,Henry Yellow,Webcam,2,75,150
+9,2025-06-05,Irene Purple,Headphones,1,80,80
+10,2025-06-05,Jack Orange,Microphone,1,100,100

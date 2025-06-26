@@ -1,0 +1,86 @@
+version: '3.8'
+
+x-airflow-common:
+  &airflow-common
+  image: apache/airflow:3.0.2
+  environment:
+    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres-airflow:5432/airflow
+    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+    - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    # --- MOVED THE PIP PACKAGE INSTALL HERE ---
+    - "PIP_ADDITIONAL_PACKAGES=apache-airflow-providers-http apache-airflow-providers-standard"
+  volumes:
+    - ./dags:/opt/airflow/dags
+  networks:
+    - elt_network
+
+services:
+  # ----------------- AIRFLOW SERVICES -----------------
+  postgres-airflow:
+    image: postgres:13
+    container_name: postgres-airflow
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    networks:
+      - elt_network
+
+  airflow-standalone:
+    <<: *airflow-common
+    container_name: airflow-standalone
+    depends_on:
+      - postgres-airflow
+    ports:
+      - "8081:8080"  # Changed from 8081 to standard 8080
+    volumes:
+      - ./dags:/opt/airflow/dags
+      
+    command: ["standalone"]
+
+  # ----------------- NIFI SERVICE -----------------
+  nifi:
+    image: apache/nifi:1.25.0
+    container_name: nifi
+    environment:
+      - NIFI_WEB_HTTPS_PORT=8443
+      - SINGLE_USER_CREDENTIALS_USERNAME=nifi
+      - SINGLE_USER_CREDENTIALS_PASSWORD=nifipassword
+      - NIFI_WEB_PROXY_HOST=nifi:8443
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./nifi_data/input:/opt/nifi/input_data
+      - ./nifi_data/nifi_drivers:/opt/nifi/drivers
+    networks:
+      - elt_network
+
+  # ----------------- DATA SOURCES -----------------
+  postgres-source:
+    image: postgres:13
+    container_name: postgres-source
+    environment:
+      - POSTGRES_USER=source_user
+      - POSTGRES_PASSWORD=source_password
+      - POSTGRES_DB=source_db
+    ports:
+      - "5431:5432"
+    networks:
+      - elt_network
+
+  mysql-source:
+    image: mysql:8.0
+    container_name: mysql-source
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=source_db
+      - MYSQL_USER=source_user
+      - MYSQL_PASSWORD=source_password
+    ports:
+      - "3308:3306" # Your original port mapping
+    networks:
+      - elt_network
+
+networks:
+  elt_network:
+    driver: bridge
