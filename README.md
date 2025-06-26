@@ -46,8 +46,7 @@ The Airflow DAG (`s3_elt_orchestrator.py`) performs the following sequence:
 
 To activate and run the complete project environment, use Docker Compose:
 
-```bash
-docker-compose up -d 
+```docker-compose up -d ```
 
 
 ## Key Takeaway: Why Use Both?
